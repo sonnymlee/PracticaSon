@@ -20,6 +20,7 @@ public class VentanaMatrizHilos extends JFrame {
     private JButton btTerminarC;
 
     // Botones Hilo Rebotador
+    private HiloRebotador hiloR;
     private JButton btIniciarR;
     private JButton btPausaR;
     private JButton btTerminarR;
@@ -188,7 +189,12 @@ public class VentanaMatrizHilos extends JFrame {
         btIniciarR.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                iniciarRebotador();
+                
+                if (hiloR != null && hiloR.isAlive()) {
+                    return;
+                }
+                hiloR = new HiloRebotador(matriz);
+                hiloR.start();
             }
         });
         btPausaR.addActionListener(new ActionListener() {
@@ -200,7 +206,7 @@ public class VentanaMatrizHilos extends JFrame {
         btTerminarR.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                terminarRebotador();
+                hiloR.detener();
             }
         });
 
