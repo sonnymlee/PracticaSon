@@ -307,6 +307,7 @@ public class VentanaMatrizHilos extends JFrame {
     // -----------------------------------------------------------------
     private void iniciarRebotador() {
         System.out.println("Evento: Iniciar Rebotador");
+        
     }
 
     private void pausarRebotador() {
