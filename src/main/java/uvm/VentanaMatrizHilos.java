@@ -1,4 +1,5 @@
 package uvm;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,6 +19,8 @@ public class VentanaMatrizHilos extends JFrame {
     private JButton btIniciarC;
     private JButton btPausaC;
     private JButton btTerminarC;
+    private JLabel lblContadorC; // Etiqueta para mostrar los @ encontrados
+    private HiloCazador hiloCazador; // Instancia de tu hilo
 
     // Botones Hilo Rebotador
     private JButton btIniciarR;
@@ -38,7 +41,7 @@ public class VentanaMatrizHilos extends JFrame {
         super("Práctica de Concurrencia - Matriz Compartida");
         inicializarGUI();
         asociarEventos();
-        
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         setLocationRelativeTo(null); // Centrar en pantalla
@@ -52,7 +55,7 @@ public class VentanaMatrizHilos extends JFrame {
         // -----------------------------------------------------------------
         JPanel panelMatriz = new JPanel(new GridLayout(15, 15, 2, 2));
         panelMatriz.setBorder(BorderFactory.createTitledBorder("Matriz Compartida (15x15)"));
-        
+
         for (int fila = 0; fila < 15; fila++) {
             for (int col = 0; col < 15; col++) {
                 JLabel lbl = new JLabel("-", SwingConstants.CENTER);
@@ -60,7 +63,7 @@ public class VentanaMatrizHilos extends JFrame {
                 lbl.setBackground(Color.WHITE);
                 lbl.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
                 lbl.setFont(new Font("Monospaced", Font.BOLD, 18));
-                
+
                 matriz[fila][col] = lbl;
                 panelMatriz.add(lbl);
             }
@@ -88,9 +91,11 @@ public class VentanaMatrizHilos extends JFrame {
         btIniciarC = new JButton("Iniciar");
         btPausaC = new JButton("Pausa");
         btTerminarC = new JButton("Terminar");
+        lblContadorC = new JLabel("Cazados: 0");
         panelCazador.add(btIniciarC);
         panelCazador.add(btPausaC);
         panelCazador.add(btTerminarC);
+        panelCazador.add(lblContadorC);
 
         panelNorte.add(panelSerpiente);
         panelNorte.add(panelCazador);
@@ -133,7 +138,7 @@ public class VentanaMatrizHilos extends JFrame {
         btIniciarL = new JButton("Iniciar");
         btPausaL = new JButton("Pausa");
         btTerminarL = new JButton("Terminar");
-        
+
         panelLimpiador.add(btIniciarL);
         panelLimpiador.add(btPausaL);
         panelLimpiador.add(btTerminarL);
@@ -265,14 +270,30 @@ public class VentanaMatrizHilos extends JFrame {
     // -----------------------------------------------------------------
     private void iniciarCazador() {
         System.out.println("Evento: Iniciar Cazador");
+        if (hiloCazador == null || !hiloCazador.isAlive()) {
+            lblContadorC.setText("Cazados: 0");
+            btPausaC.setText("Pausa");
+            hiloCazador = new HiloCazador(matriz, lblContadorC);
+            hiloCazador.start();
+        }
     }
 
     private void pausarCazador() {
-        System.out.println("Evento: Pausar Cazador");
+        System.out.println("Evento: Pausar/Continuar Cazador");
+        if (hiloCazador != null && hiloCazador.isAlive()) {
+            hiloCazador.alternarPausa();
+            // esto pa cambiar el texto a que continue y pause segun en que estado este el
+            // hilo
+            btPausaC.setText(hiloCazador.isPausado() ? "Continuar" : "Pausa");
+        }
     }
 
     private void terminarCazador() {
         System.out.println("Evento: Terminar Cazador");
+        if (hiloCazador != null && hiloCazador.isAlive()) {
+            hiloCazador.terminar();
+            btPausaC.setText("Pausa");
+        }
     }
 
     // -----------------------------------------------------------------
