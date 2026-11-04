@@ -1,7 +1,9 @@
 package uvm;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 public class HiloClima extends Thread {
 
@@ -77,7 +79,7 @@ public class HiloClima extends Thread {
     private void cambiarColor(JLabel celda)
             throws InterruptedException {
 
-        SwingUtilities.invokeAndWait(() -> {
+        SwingUtilities.invokeLater(() -> {
             Color actual = celda.getForeground();
 
             if (Color.RED.equals(actual)) {

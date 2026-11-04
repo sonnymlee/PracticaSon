@@ -32,6 +32,7 @@ public class VentanaMatrizHilos extends JFrame {
     private JButton btIniciarCl;
     private JButton btPausaCl;
     private JButton btTerminarCl;
+    private HiloClima hiloClima;
 
     // Botones Hilo Limpiador
     private JButton btIniciarL;
@@ -324,15 +325,34 @@ public class VentanaMatrizHilos extends JFrame {
     // -----------------------------------------------------------------
     private void iniciarClima() {
         System.out.println("Evento: Iniciar Clima");
+        if (hiloClima == null) {
+            hiloClima = new HiloClima(matriz);
+            hiloClima.start();
+        }
+        hiloClima.activar();
     }
 
     private void pausarClima() {
         System.out.println("Evento: Pausar Clima");
+        if (hiloClima != null) {
+            boolean estaPausado = hiloClima.alternarPausa();
+            if (estaPausado) {
+                btPausaCl.setText("Continuar");
+            } else {
+                btPausaCl.setText("Pausa");
+            }
+        }
     }
 
     private void terminarClima() {
         System.out.println("Evento: Terminar Clima");
+        if (hiloClima != null) {
+            hiloClima.terminar();
+            hiloClima = null;
+            btPausaCl.setText("Pausa");
+        }
     }
+
 
     // -----------------------------------------------------------------
     // Métodos privados para manejo de eventos (Limpiador)
