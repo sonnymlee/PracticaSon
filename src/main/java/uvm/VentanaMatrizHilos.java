@@ -37,6 +37,7 @@ public class VentanaMatrizHilos extends JFrame {
     private JButton btIniciarL;
     private JButton btPausaL;
     private JButton btTerminarL;
+    private HiloLimpiador hiloLimpiador;
 
     public VentanaMatrizHilos() {
         super("Práctica de Concurrencia - Matriz Compartida");
@@ -338,14 +339,26 @@ public class VentanaMatrizHilos extends JFrame {
     // -----------------------------------------------------------------
     private void iniciarLimpiador() {
         System.out.println("Evento: Iniciar Limpiador");
+        if(hiloLimpiador==null || !hiloLimpiador.isAlive()){
+            hiloLimpiador=new HiloLimpiador(1000, matriz);
+            hiloLimpiador.start();
+        }
     }
 
     private void pausarLimpiador() {
         System.out.println("Evento: Pausar Limpiador");
+        if(hiloLimpiador!=null && hiloLimpiador.isAlive()){
+            hiloLimpiador.setPausado(!hiloLimpiador.isPausado());
+            btPausaL.setText(hiloLimpiador.isPausado() ? "Continuar" : "Pausa");
+        }
     }
 
     private void terminarLimpiador() {
         System.out.println("Evento: Terminar Limpiador");
+        if(hiloLimpiador!=null && hiloLimpiador.isAlive()){
+            hiloLimpiador.setTerminado(true);
+            btPausaL.setText("Pausa");
+        }
     }
 
     // Métodos auxiliares para acceso de los estudiantes
