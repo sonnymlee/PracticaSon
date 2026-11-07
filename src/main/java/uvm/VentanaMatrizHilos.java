@@ -11,6 +11,7 @@ public class VentanaMatrizHilos extends JFrame {
     private JLabel[][] matriz = new JLabel[15][15];
 
     // Botones Hilo Serpiente
+    private HiloSerpiente hs;
     private JButton btIniciarS;
     private JButton btPausaS;
     private JButton btTerminarS;
@@ -262,15 +263,34 @@ public class VentanaMatrizHilos extends JFrame {
     // Métodos privados para manejo de eventos (Serpiente)
     // -----------------------------------------------------------------
     private void iniciarSerpiente() {
-        System.out.println("Evento: Iniciar Serpiente");
+        if(hs==null){
+            hs=new HiloSerpiente(1000,matriz);
+            System.out.println("Evento: Iniciar Serpiente");
+            hs.start();
+            btIniciarS.setText("Continuar");
+        }if(hs!=null&&hs.isPaused()){
+            hs.setPaused(false);
+            System.out.println("Hilo Serpiente reanudado");
+            btIniciarS.setText("Iniciar");
+        }
     }
 
     private void pausarSerpiente() {
         System.out.println("Evento: Pausar Serpiente");
+        if(hs!=null&&hs.isAlive()){
+                    hs.setPaused(true);
+                    System.out.println("Hilo Serpiente pausado");
+        }else{JOptionPane.showMessageDialog(null,"No existe hilo");}
     }
 
     private void terminarSerpiente() {
         System.out.println("Evento: Terminar Serpiente");
+        if(hs!=null&&hs.isAlive()){
+                    hs.setEnded(true);
+                    hs.interrupt();
+                    hs=null;
+                    System.out.println("Hilo Serpiente terminado");
+        }else{JOptionPane.showMessageDialog(null,"No existe hilo");}
     }
 
     // -----------------------------------------------------------------

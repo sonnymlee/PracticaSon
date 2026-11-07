@@ -75,7 +75,9 @@ public class HiloLimpiador extends Thread {
             for(int f=0; f<15; f++){
                 for(int c=0; c<15; c++){
                     if(!matriz[f][c].getBackground().equals(Color.WHITE) ||
-                       !matriz[f][c].getText().equals("-")){
+                       !matriz[f][c].getText().equals("-") || 
+                       matriz[f][c].getForeground().equals(Color.RED) || 
+                       matriz[f][c].getForeground().equals(Color.BLUE)){
                         mod++;
                     }
                 }
