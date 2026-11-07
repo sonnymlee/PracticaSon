@@ -4,41 +4,44 @@ import java.awt.*;
 import java.util.Random;
 
 public class HiloRebotador extends Thread {
-    
-    //var
-    private JLabel [][] matriz;
-    private int n = 15;
+
+    // var
+    private final JLabel[][] matriz;
+    private static int n = 15;
     private int x = 0;
+    private int y = 0;
     private int nx = 1;
     private int ny = 1;
-    private int y = 0;
-    private String sim = "@";
-    private boolean exe = true;
+    private static  String sim = "@";
+    private volatile boolean exe = true;
     private boolean pausado = false;
-    private final Random random = new Random();   // <-- para dirección aleatoria
+    private final Random random = new Random();
 
-    //metodos
-    public void detener(){
+    public HiloRebotador(JLabel[][] matriz) {
+        this.matriz = matriz;
+    }
+
+    public void detener() {
         exe = false;
         synchronized (this) {
-            notifyAll();   // despierta si está en wait() para que pueda salir
+            notifyAll();
         }
     }
 
-    
-    public void pausaRebotador(){
-        synchronized (this){
+    public void pausaRebotador() {
+        synchronized (this) {
             pausado = !pausado;
             if (!pausado) {
-                notifyAll();   
+                notifyAll();
             }
         }
     }
 
-    public void pausaR(){
+    // Espera mientras esté pausado, pero sale si el hilo fue detenido
+    private void pausaR() {
         try {
-            synchronized (this){
-                while (pausado){
+            synchronized (this) {
+                while (pausado && exe) {
                     wait();
                 }
             }
@@ -47,60 +50,74 @@ public class HiloRebotador extends Thread {
         }
     }
 
-    public HiloRebotador(JLabel[][] matriz) {
-        this.matriz = matriz;
+    // --- Helpers de dibujo (extraídos para bajar complejidad de run) ---
+
+    private void pintar(int fila, int col, String texto, Color fondo) {
+        SwingUtilities.invokeLater(() -> {
+            matriz[fila][col].setText(texto);
+            matriz[fila][col].setBackground(fondo);
+        });
     }
 
-    @Override 
-    public void run(){
+    private void borrar(int fila, int col) {
+        pintar(fila, col, "-", Color.WHITE);
+    }
+
+    private void dibujar(int fila, int col) {
+        pintar(fila, col, sim, Color.green);
+    }
+
+    private void avanzar() {
+        x += nx;
+        y += ny;
+    }
+
+    private void rebotar() {
+        if (x <= 0) {
+            x = 0;
+            nx = 1;
+            if (random.nextBoolean()) ny = -ny;
+        } else if (x >= n - 1) {
+            x = n - 1;
+            nx = -1;
+            if (random.nextBoolean()) ny = -ny;
+        }
+
+        if (y <= 0) {
+            y = 0;
+            ny = 1;
+            if (random.nextBoolean()) nx = -nx;
+        } else if (y >= n - 1) {
+            y = n - 1;
+            ny = -1;
+            if (random.nextBoolean()) nx = -nx;
+        }
+    }
+
+    // Devuelve false si el hilo fue interrumpido (equivale al antiguo break)
+    private boolean dormir() {
+        try {
+            Thread.sleep(150);
+            return true;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    @Override
+    public void run() {
         while (exe) {
-            pausaR();              
-            if (!exe) break;
+            pausaR();
+            if (!exe) return;
 
-            int xborrar = x;
-            int yborrar = y;
-            SwingUtilities.invokeLater(() -> {
-                matriz[xborrar][yborrar].setText("-");
-                matriz[xborrar][yborrar].setBackground(Color.WHITE);
-            });
-            x += nx;
-            y += ny;
+            borrar(x, y);
+            avanzar();
+            rebotar();
+            dibujar(x, y);
 
-            // rebotes con cambio de trayectoria 
-            if (x <= 0) {
-                x = 0;
-                nx = 1;
-                if (random.nextBoolean()) ny = -ny;   
-            } else if (x >= n - 1) {
-                x = n - 1;
-                nx = -1;
-                if (random.nextBoolean()) ny = -ny;
-            }
-
-            if (y <= 0) {
-                y = 0;
-                ny = 1;
-                if (random.nextBoolean()) nx = -nx;
-            } else if (y >= n - 1) {
-                y = n - 1;
-                ny = -1;
-                if (random.nextBoolean()) nx = -nx;
-            }
-
-            // dibujar
-            int dibujarx = x;
-            int dibujary = y;
-            SwingUtilities.invokeLater(() -> {
-                matriz[dibujarx][dibujary].setText(sim);
-                matriz[dibujarx][dibujary].setBackground(Color.green);
-            });
-
-            try {
-                Thread.sleep(150);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-                break;
+            if (!dormir()) {
+                exe = false;
             }
         }
     }
