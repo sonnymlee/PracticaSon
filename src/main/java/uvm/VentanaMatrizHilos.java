@@ -207,7 +207,7 @@ public class VentanaMatrizHilos extends JFrame {
         btPausaR.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                pausarRebotador();
+                hiloR.pausaRebotador();
             }
         });
         btTerminarR.addActionListener(new ActionListener() {
