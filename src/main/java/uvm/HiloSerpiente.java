@@ -1,11 +1,12 @@
 package uvm;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
 
 public class HiloSerpiente extends Thread {
-    //Varibles
+
     private int delay;
     private boolean paused;
     private boolean ended;
@@ -13,18 +14,19 @@ public class HiloSerpiente extends Thread {
     private int posFila = 0;
     private int posCol = 0;
     private int contador = 1;
-    private int direccion = 1;
-    //Metodos
+    private int direccion = 1; // 1 = Derecha, -1 = Izquierda
+
     public HiloSerpiente(int time, JLabel[][] matriz) {
-        delay=time;
-        paused = false;
-        ended = false;
+        this.delay = time;
+        this.paused = false;
+        this.ended = false;
         this.matriz = matriz;
     }
 
-    @Override public void run(){
-        while(!ended){
-            try{
+    @Override
+    public void run() {
+        while (!ended) {
+            try {
                 synchronized (this) {
                     while (paused && !ended) {
                         wait();
@@ -35,85 +37,72 @@ public class HiloSerpiente extends Thread {
                 }
                 hacerTrabajoSerpiente();
                 sleep(delay);
-            }
-            catch(InterruptedException e){
+            } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                JOptionPane.showMessageDialog(null, "Interrupcion");
+                JOptionPane.showMessageDialog(null, "Interrupción");
             }
         }
     }
 
-    public boolean isEnded(){
+    public synchronized boolean isEnded() {
         return ended;
     }
 
-    public boolean isPaused(){
+    public synchronized boolean isPaused() {
         return paused;
     }
 
-    public void setPaused(boolean x){
-        synchronized(this){
-        paused=x;
-        if(!paused)
-        {
+    public synchronized void setPaused(boolean x) {
+        paused = x;
+        if (!paused) {
             notifyAll();
         }
     }
-    }
 
-    public void setEnded(boolean y){
-        synchronized (this) {
-            this.ended = y;
-            if (this.ended) {
-                notifyAll();
-            }
+    public synchronized void setEnded(boolean y) {
+        this.ended = y;
+        if (this.ended) {
+            notifyAll();
         }
     }
 
-    private void hacerTrabajoSerpiente(){
+    private void hacerTrabajoSerpiente() {
         int prevFila = posFila;
         int prevCol = posCol;
 
-        if (direccion == 1) {
-            if (posCol < 14) {
-                posCol++;
-            } else { 
-                posFila++;
-                if (posFila >= 15) { 
-                    posFila = 0;
-                    posCol = 0;
-                    direccion = 1;
-                } else {
-                    direccion = -1;
-                }
-            }
-        } else { 
-            if (posCol > 0) {
-                posCol--;
-            } else {
-                posFila++;
-                if (posFila >= 15) { 
-                    posFila = 0;
-                    posCol = 0;
-                    direccion = 1;
-                } else {
-                    direccion = 1;
-                }
-            }
-        }
+        // Se delega el cálculo de posición para mantener complejidad baja
+        calcularSiguientePosicion();
 
         int nuevaFila = posFila;
         int nuevaCol = posCol;
         int numeroActual = contador++;
 
         SwingUtilities.invokeLater(() -> {
-            // 1. Limpiar la casilla anterior y restaurar su color original
             matriz[prevFila][prevCol].setText("-");
             matriz[prevFila][prevCol].setForeground(Color.BLACK);
 
-            // 2. Colocar el número consecutivo en azul en la nueva posición
             matriz[nuevaFila][nuevaCol].setText(String.valueOf(numeroActual));
             matriz[nuevaFila][nuevaCol].setForeground(Color.BLUE);
         });
+    }
+
+    /**
+     * Calcula la siguiente celda en patrón serpiente (izq-der, abajo, der-izq).
+     */
+    private void calcularSiguientePosicion() {
+        int siguienteCol = posCol + direccion;
+
+        if (siguienteCol >= 0 && siguienteCol < 15) {
+            posCol = siguienteCol;
+        } else {
+            posFila++;
+            if (posFila >= 15) {
+                posFila = 0;
+                posCol = 0;
+                direccion = 1;
+            } else {
+                direccion = -direccion; // Invierte el sentido del movimiento
+            }
+        }
     }
 }
