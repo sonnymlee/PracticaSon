@@ -61,23 +61,28 @@ public class HiloClima extends Thread {
 
     // Recorre todas las celdas de la matriz.
     private void recorrerMatriz() throws InterruptedException {
-        for (int fila = 0; fila < matriz.length; fila++) {
-            for (int columna = 0;
-                 columna < matriz[fila].length;
-                 columna++) {
+        for (JLabel[] fila : matriz) {
+                 for (JLabel celda : fila) {
 
                 verificarPausa();
 
-                cambiarColor(matriz[fila][columna]);
+                cambiarColor(celda);
 
-                Thread.sleep(40);
+                pausaCorta();
             }
         }
     }
+        private synchronized void pausaCorta() throws InterruptedException {
+        long limite = System.currentTimeMillis() + 40;
+        long restante = 40;
 
+        while (restante > 0 && !terminado) {
+            wait(restante);
+            restante = limite - System.currentTimeMillis();}
+    }
     // Cambia negro -> rojo -> azul -> negro.
     private void cambiarColor(JLabel celda)
-            throws InterruptedException {
+         {
 
         SwingUtilities.invokeLater(() -> {
             Color actual = celda.getForeground();
