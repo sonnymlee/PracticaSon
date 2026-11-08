@@ -12,11 +12,12 @@ public class HiloLimpiador extends Thread {
     private boolean terminado;
     private boolean pausado;
     private int TAM_BLOQUE=4;
-    private JLabel[][] matriz;    
+    private JLabel[][] matriz;
+    private Random random=new Random();    
     
     private void LimpiarMatriz(){
-        int inicioF=new Random().nextInt(15-TAM_BLOQUE+1);
-        int inicioC=new Random().nextInt(15-TAM_BLOQUE+1);
+        int inicioF=random.nextInt(15-TAM_BLOQUE+1);
+        int inicioC=random.nextInt(15-TAM_BLOQUE+1);
             for(int f=inicioF; f<inicioF+TAM_BLOQUE; f++){
                 for(int c=inicioC; c<inicioC+TAM_BLOQUE; c++){    
                 int fila=f;                      
@@ -34,7 +35,9 @@ public class HiloLimpiador extends Thread {
 
 
     public boolean isPausado(){
-        return pausado;
+        synchronized(this){
+            return pausado;
+        }
     }
 
     public void setPausado(boolean pau){
@@ -47,7 +50,9 @@ public class HiloLimpiador extends Thread {
     }
 
     public boolean isTerminado(){
-        return terminado;
+        synchronized(this){
+            return terminado;
+        }
     }
 
     public void setTerminado(boolean ter){
@@ -97,6 +102,7 @@ public class HiloLimpiador extends Thread {
                     }
             }catch (InterruptedException ex){
                 JOptionPane.showMessageDialog(null,"Interrupción");
+                Thread.currentThread().interrupt();
                 break;
             }
         }
